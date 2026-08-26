@@ -14,6 +14,16 @@
     <B44RatchetRepositoryRoot>$(MSBuildThisFileDirectory)</B44RatchetRepositoryRoot>
     <B44RatchetBaseline>$(MSBuildThisFileDirectory)ratchet-baseline.txt</B44RatchetBaseline>
 
+    <!-- Repository hygiene and the analyzer-suppression ratchet, same anchor.
+         B44EngineFree is deliberately NOT set here or on the tests, for the
+         reason B44EngineFreeCore never is: this repository exists to reach
+         Unity. The Unity fixture under proving/ is excluded from the
+         suppression scan for the same reason it is excluded from the ratchet —
+         Unity owns that compilation, not this build. -->
+    <B44HygieneEnabled>true</B44HygieneEnabled>
+    <B44SuppressionBudget>0</B44SuppressionBudget>
+    <B44WarningPolicy>true</B44WarningPolicy>
+
     <!-- B44EngineFreeCore is deliberately NOT set and must never be. This is the
          one B44 repository allowed to reference Unity; the guard exists to keep
          Unity out of everywhere else.
@@ -57,6 +67,8 @@
   <PropertyGroup Condition="'$(TargetFramework)' != '' and '$(TargetFramework)' != '$(B44UnityRuntimeTargetFramework)'">
     <B44AgentSyncEnabled>false</B44AgentSyncEnabled>
     <B44RatchetEnabled>false</B44RatchetEnabled>
+    <B44HygieneEnabled>false</B44HygieneEnabled>
+    <B44SuppressionBudget></B44SuppressionBudget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,6 +79,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="B44.Standards" Version="0.11.*" PrivateAssets="all" />
+    <PackageReference Include="B44.Standards" Version="0.12.*" PrivateAssets="all" />
   </ItemGroup>
 </Project>
