@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Unity compiles the package sources itself; this project compiles the
+         same files a second time, under the constraints Unity would apply, so
+         a break is a red CI run on any machine rather than a red console the
+         next time someone opens the editor. It is a check, not a shipping
+         artifact — the package ships through UPM, not NuGet. -->
+    <AssemblyName>B44.Unity</AssemblyName>
+    <RootNamespace>B44.Unity</RootNamespace>
+    <IsPackable>false</IsPackable>
+
+    <!-- Both Unity runtime generations, from the single baseline declaration in
+         Directory.Build.props. The first is what Unity 6 loads today; the
+         second is the modern CoreCLR line these sources are meant to end up on.
+         Compiling against both is what makes the eventual retarget a deletion
+         rather than a port — and it stops the current runtime's limits from
+         quietly becoming the ceiling the sources are written to. -->
+    <TargetFrameworks>$(B44UnityRuntimeTargetFramework);$(B44UnityFutureTargetFramework)</TargetFrameworks>
+
+    <!-- Unity 6 compiles at C# 9, so a C# 10+ construct — a file-scoped
+         namespace, a record struct, a collection expression — fails here
+         instead of in the editor, where the message arrives much later and
+         attached to somebody else's work. This constraint belongs to the
+         current runtime generation and leaves with it. -->
+    <LangVersion>$(B44UnityLangVersion)</LangVersion>
+
+    <!-- The package sources are the UPM package's, compiled in place. Copying
+         them would create a second copy to keep in sync, which is the failure
+         this arrangement exists to avoid. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\com.b44.unity\Runtime\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only, and referenced by path rather than as a normal
+         package: the assemblies inside are net35-era, so NuGet would reject the
+         package as incompatible before ever looking at them. ExcludeAssets
+         keeps NuGet out of the way; GeneratePathProperty gives the extracted
+         location to reference directly. Nothing is redistributed — a Unity
+         project supplies these at runtime, exactly as a Godot game's SDK
+         supplies GodotSharp. -->
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33"
+                      GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+
+    <!-- The engine-free half, referenced exactly as any other .NET consumer
+         would reference it. The dependency runs one way only: shared B44 never
+         references this, and B44.Standards fails the build if it tries. -->
+    <PackageReference Include="B44.Common" Version="0.11.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Unity assemblies carry a fixed 0.0.0.0 assembly version across every
+         editor release, which is why a plugin compiled against one Unity loads
+         in another. The 2021.3 reference assemblies therefore describe the same
+         MonoBehaviour, Debug and Application surface a current editor supplies;
+         they are here because they are the newest Unity publishes to NuGet, and
+         because this compile only needs the parts of that surface that have not
+         moved in a decade. Private=false: never copied to output. -->
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(PkgUnityEngine_Modules)\lib\net35\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PreventPackagingUnityAssemblies" BeforeTargets="Pack">
+    <Error Text="B44.Unity ships through UPM, not NuGet. Packing it would create a second distribution channel and a version number that disagrees with package.json." />
+  </Target>
+</Project>

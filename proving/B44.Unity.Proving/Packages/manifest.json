@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "com.b44.unity": "file:../../../com.b44.unity",
+    "com.unity.test-framework": "1.4.5"
+  }
+}

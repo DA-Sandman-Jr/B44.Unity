@@ -1,0 +1,12 @@
+{
+  "name": "com.b44.unity",
+  "version": "0.1.0",
+  "displayName": "B44.Unity",
+  "description": "Unity-side adapters for B44 games. The engine-coupled counterpart to the engine-free B44.Common: it converts Unity environment concerns into the representations B44 already expects, and projects B44 results back into Unity. It does not contain game logic.",
+  "unity": "6000.0",
+  "author": {
+    "name": "David Sanders",
+    "url": "https://github.com/DA-Sandman-Jr"
+  },
+  "hideInEditor": false
+}

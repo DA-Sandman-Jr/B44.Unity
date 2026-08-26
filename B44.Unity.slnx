@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="B44.Unity.Compile/B44.Unity.Compile.csproj" />
+  <Project Path="B44.Unity.Tests/B44.Unity.Tests.csproj" />
+</Solution>

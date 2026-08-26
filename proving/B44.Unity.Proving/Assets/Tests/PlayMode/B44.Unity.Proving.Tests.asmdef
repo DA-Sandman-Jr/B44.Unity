@@ -1,0 +1,23 @@
+{
+  "name": "B44.Unity.Proving.Tests",
+  "rootNamespace": "B44.Unity.Proving.Tests",
+  "references": [
+    "UnityEngine.TestRunner",
+    "B44.Unity.Proving",
+    "B44.Unity"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "B44.Common.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

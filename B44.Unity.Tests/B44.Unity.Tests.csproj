@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <!-- Required on .NET 10 SDK: without this, `dotnet test` restores and
+         exits without running any xunit.v3 tests. -->
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+
+    <!-- The repository root, so the boundary tests can read the package manifest
+         and assembly definition as the files a Unity editor would read. Passed
+         through MSBuild rather than walked at runtime, because the test binary's
+         distance from the repository root is a build-layout detail that has no
+         business being encoded in a test. -->
+    <B44UnityRepositoryRoot>$(MSBuildThisFileDirectory)..\</B44UnityRepositoryRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>B44UnityRepositoryRoot</_Parameter1>
+      <_Parameter2>$(B44UnityRepositoryRoot)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\B44.Unity.Compile\B44.Unity.Compile.csproj" />
+  </ItemGroup>
+
+  <Target Name="PreventUnityDependencies" BeforeTargets="ResolveReferences">
+    <!-- This suite must keep running on a machine with no editor installed, which
+         is what makes it honest about the half of B44.Unity it can actually
+         cover. It reaches the package's engine-free rules through the compile
+         project without ever loading a Unity assembly; acquiring one directly
+         would quietly turn that into a suite nobody can run. -->
+    <Error Condition="'@(PackageReference->WithMetadataValue('Identity','UnityEngine.Modules'))' != ''"
+           Text="B44.Unity.Tests must not reference Unity assemblies. Behaviour that needs a Unity runtime belongs in the proving project's Unity Test Framework suites." />
+  </Target>
+</Project>

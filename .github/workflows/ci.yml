@@ -1,0 +1,24 @@
+name: ci
+
+# Format gate + solution build + tests, via the shared B44 workflow.
+#
+# Note what this does NOT cover, and that the omission is deliberate: this
+# repository owns the Unity integration, and its own ci runs on a runner with no
+# editor installed. That is the proof of a rule stated in CLAUDE.md — the
+# package's routing and path rules are free of Unity types, so they are testable
+# without one, and the compile project catches a Unity API or language-version
+# break at netstandard2.1 / C# 9. The integration itself is covered by
+# unity-proving.yml, which needs a licence.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    # core-project is omitted: that input exists for game repos with an
+    # engine-free Core, which by definition this repository cannot have.
+    # Omitting it builds the solution instead.
+    uses: DA-Sandman-Jr/B44.Standards/.github/workflows/reusable-dotnet-ci.yml@9c6faefab05253a4fa1d16b971d37cc8c80bf750 # split repository + .slnx support
+    with:
+      test-project: B44.Unity.Tests/B44.Unity.Tests.csproj

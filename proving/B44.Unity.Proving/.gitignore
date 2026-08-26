@@ -1,0 +1,26 @@
+# Editor-generated, per-machine, and regenerated on open.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+
+# Deliberately not committed: this fixture does not author project settings, so
+# that a consumer's editor writes its own defaults rather than inheriting a
+# hand-written file nobody validated. run-proving-tests.ps1 pins the editor
+# version here before each run.
+/ProjectSettings/
+
+# Materialized by scripts/sync-proving-dependencies.ps1, the Unity equivalent of
+# a restore. Committing resolved NuGet assemblies would put build output in the
+# repository and pin a version the manifest no longer states.
+/Assets/Plugins/
+
+# Unity regenerates these from the assembly definitions on open.
+*.csproj
+*.sln
+
+# Written by run-proving-tests.ps1.
+TestResults.xml

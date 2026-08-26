@@ -1,0 +1,71 @@
+name: unity proving
+
+# Runs the proving project's Unity Test Framework suite against a real editor.
+# This is the only workflow that proves the Unity integration works; ci.yml
+# proves the boundary's engine-free half on a runner with no editor.
+#
+# Gated on a repository variable rather than run by default, because starting an
+# editor needs a Unity licence. A workflow that silently no-ops when a secret is
+# missing is worse than one that plainly says it is off, so the gate is explicit
+# and its skip is visible in the job list.
+#
+# To enable: set the repository variable UNITY_PROVING_ENABLED to 'true' and add
+# UNITY_LICENSE (or UNITY_SERIAL with UNITY_EMAIL / UNITY_PASSWORD) as secrets.
+on:
+  workflow_dispatch:
+    inputs:
+      unity-version:
+        description: 'Editor version, e.g. 6000.0.58f1. Required: each consumer owns the version it tests against.'
+        required: true
+        type: string
+  push:
+    branches: [main]
+
+jobs:
+  proving:
+    if: vars.UNITY_PROVING_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Materialize the engine-free B44 assemblies
+        shell: pwsh
+        # Unity does not restore NuGet. Without this the project does not
+        # compile, and the failure looks like a broken package rather than a
+        # missing restore.
+        run: ./scripts/sync-proving-dependencies.ps1
+
+      - name: Cache the editor Library folder
+        uses: actions/cache@v4
+        with:
+          path: proving/B44.Unity.Proving/Library
+          key: unity-library-${{ inputs.unity-version || vars.UNITY_PROVING_VERSION }}-${{ hashFiles('proving/B44.Unity.Proving/Packages/manifest.json') }}
+          restore-keys: unity-library-
+
+      - name: Run the PlayMode suite
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: proving/B44.Unity.Proving
+          unityVersion: ${{ inputs.unity-version || vars.UNITY_PROVING_VERSION }}
+          testMode: playmode
+          artifactsPath: proving-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-proving-results
+          path: proving-artifacts
+          if-no-files-found: ignore
