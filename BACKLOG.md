@@ -64,12 +64,13 @@ running an editor in CI needs a licence. It has not run.
 
 ### Input and application shell
 
-Keyboard, controller and touch input, rebinding, binding persistence, device
-switching, UI navigation and focus, control prompts, settings screens, pause,
-modals, loading flows, and scene transitions are all out of scope and none of
-them were started. They are the consumers of this boundary, not part of it.
-Nothing here was shaped to anticipate them beyond leaving a place for them to
-live.
+Production input and application-shell adapters remain deferred. Revisit keyboard,
+controller and touch integration, rebinding, saved preferences, UI navigation and
+focus only after B44 selects and verifies the modern Unity runtime baseline.
+Require real editor/player and device evidence before claiming support; a future
+runtime expectation or compile-only check is insufficient. This backlog item does
+not authorize a production adapter, an older shared framework target, or duplicated
+implementations.
 
 ### A shared engine abstraction
 
